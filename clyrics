@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # Author : Daniel "Trizen" Șuteu
 # License: GPLv3
@@ -38,6 +38,13 @@ use Time::HiRes qw(sleep);
 # Name and version
 my $name    = 'clyrics';
 my $version = '0.12';
+
+# CGI mode
+my $cgiq;
+if (exists $ENV{SCRIPT_FILENAME}) { 
+  use CGI;
+  $cgiq = CGI->new;
+}
 
 # Debug mode
 my $DEBUG = 0;
@@ -150,10 +157,29 @@ elsif (exists $opt{p}) {
 
 # song name from arguments
 else {
-    my $song_name = join(' ', @ARGV);
+    my $song_name;
+    if (defined $cgiq) {
+        if ( my $error = $cgiq->cgi_error ) {
+            print $cgiq->header( -status => $error );
+            print "Error: $error";
+            exit 0;
+        }
+        $song_name = $cgiq->param('q');
+    } else {
+        $song_name = join(' ', @ARGV);
+    }
     if (length($song_name)) {
         my $lyrics = get_lyrics($song_name);
-        if (defined $lyrics) {
+        if (defined $cgiq) {
+            if (defined $lyrics) {
+                print "<html><head><title>kbox</title></head><body>\n" .
+                      "<p style=\"font-family: monospace\">$lyrics</p>\n" .
+                      "</body></html>\n";
+            } else {
+                print $cgiq->header( -status => 404 );
+                print "Error: 404 Lyrics Not Found";
+            }
+        } elsif (defined $lyrics) {
             say $lyrics;
         }
     }
