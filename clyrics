@@ -172,9 +172,10 @@ else {
         my $lyrics = get_lyrics($song_name);
         if (defined $cgiq) {
             if (defined $lyrics) {
-                print "<html><head><title>kbox</title></head><body>\n" .
-                      "<p style=\"font-family: monospace\">$lyrics</p>\n" .
-                      "</body></html>\n";
+                say $lyrics;
+                #print "<html><head><title>kbox</title></head><body>\n" .
+                #      "<p style=\"font-family: monospace\">$lyrics</p>\n" .
+                #      "</body></html>\n";
             } else {
                 print $cgiq->header( -status => 404 );
                 print "Error: 404 Lyrics Not Found";
